@@ -1,0 +1,22 @@
+{
+  "name": "ameax/datev-extf",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "ameax\\DatevExtf\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Michael Schmidt",
+      "email": "69188126+ms-aranes@users.noreply.github.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4 || ^8.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  }
+}
