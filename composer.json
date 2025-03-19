@@ -17,8 +17,15 @@
     "php": "^7.4 || ^8.0"
   },
   "require-dev": {
-	  "pestphp/pest": "^1.22",
-        "pestphp/pest-plugin-mock": "^1.0",
-        "pestphp/pest-plugin-expectations": "^1.1"
+	  "pestphp/pest": "^1.22"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/pest"
   }
+
 }
