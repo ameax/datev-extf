@@ -1,6 +1,6 @@
 <?php
 
-namespace ameax\DatevExtf;
+namespace ameax\DatevExtf\Enums;
 
 final class AccountingPurpose
 {

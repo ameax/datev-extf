@@ -4,6 +4,7 @@ namespace ameax\DatevExtf;
 
 class DatevExtfWriterParty
 {
+
     protected array $fields = [];
 
     public function __construct()
@@ -11,7 +12,7 @@ class DatevExtfWriterParty
         $this->applyDefaults();
     }
 
-    public function applyDefaults(): self
+    public function applyDefaults() : self
     {
         $this->fields = array_fill_keys($this->getFieldOrder(), '');
         $this->fields['party_type'] = '2'; // Default: Unternehmen
@@ -20,10 +21,10 @@ class DatevExtfWriterParty
         return $this;
     }
 
-    public function setFromArray(array $data): self
+    public function fromArray(array $data) : self
     {
         foreach ($data as $key => $value) {
-            $method = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
             if (method_exists($this, $method)) {
                 $this->$method($value);
             } elseif (array_key_exists($key, $this->fields)) {
@@ -33,20 +34,30 @@ class DatevExtfWriterParty
         return $this;
     }
 
-    public function build(): string
+    public function build() : string
     {
         $orderedFields = $this->getFieldOrder();
         $values = [];
 
         foreach ($orderedFields as $key) {
             $value = $this->fields[$key] ?? '';
-            $values[] = is_numeric($value) ? $value : '"' . $value . '"';
+            
+            // Format values based on type
+            if (is_float($value)) {
+                // Format float values with comma as decimal separator
+                $value = number_format($value, 2, ',', '');
+            } elseif ($value instanceof \DateTime) {
+                // Format all date fields as: TTMMJJJJ
+                $value = $value->format('dmY');
+            }
+            
+            $values[] = is_numeric($value) && !is_float($value) ? $value : '"'.$value.'"';
         }
 
         return implode(';', $values);
     }
 
-    protected function getFieldOrder(): array
+    protected function getFieldOrder() : array
     {
         return [
             'account_number',                    // 1. Konto
@@ -307,287 +318,1510 @@ class DatevExtfWriterParty
     }
 
     // Fluent setters for basic address fields
-    public function setAccountNumber(string $value): self { $this->fields['account_number'] = $value; return $this; }
-    public function setCompanyName(string $value): self { $this->fields['company_name'] = $value; return $this; }
-    public function setBusinessPurpose(string $value): self { $this->fields['business_purpose'] = $value; return $this; }
-    public function setPersonLastName(string $value): self { $this->fields['person_last_name'] = $value; return $this; }
-    public function setPersonFirstName(string $value): self { $this->fields['person_first_name'] = $value; return $this; }
-    public function setUnknownLastName(string $value): self { $this->fields['unknown_last_name'] = $value; return $this; }
-    public function setPartyType(string $value): self { $this->fields['party_type'] = $value; return $this; }
-    public function setShortName(string $value): self { $this->fields['short_name'] = $value; return $this; }
-    public function setEuCountry(string $value): self { $this->fields['eu_country'] = $value; return $this; }
-    public function setEuVatId(string $value): self { $this->fields['eu_vat_id'] = $value; return $this; }
-    public function setSalutation(string $value): self { $this->fields['salutation'] = $value; return $this; }
-    public function setTitle(string $value): self { $this->fields['title'] = $value; return $this; }
-    public function setNobilityTitle(string $value): self { $this->fields['nobility_title'] = $value; return $this; }
-    public function setPrefix(string $value): self { $this->fields['prefix'] = $value; return $this; }
-    public function setAddressType(string $value): self { $this->fields['address_type'] = $value; return $this; }
-    public function setStreet(string $value): self { $this->fields['street'] = $value; return $this; }
-    public function setPob(string $value): self { $this->fields['pob'] = $value; return $this; }
-    public function setPostalCode(string $value): self { $this->fields['postal_code'] = $value; return $this; }
-    public function setCity(string $value): self { $this->fields['city'] = $value; return $this; }
-    public function setCountry(string $value): self { $this->fields['country'] = $value; return $this; }
-    public function setAdditionalDelivery(string $value): self { $this->fields['additional_delivery'] = $value; return $this; }
-    public function setAdditionalAddress(string $value): self { $this->fields['additional_address'] = $value; return $this; }
-    public function setAltSalutation(string $value): self { $this->fields['alt_salutation'] = $value; return $this; }
-    public function setAltDelivery1(string $value): self { $this->fields['alt_delivery_1'] = $value; return $this; }
-    public function setAltDelivery2(string $value): self { $this->fields['alt_delivery_2'] = $value; return $this; }
-    public function setIsCorrespondenceAddress(string $value): self { $this->fields['is_correspondence_address'] = $value; return $this; }
-    public function setAddressValidFrom(string $value): self { $this->fields['address_valid_from'] = $value; return $this; }
-    public function setAddressValidUntil(string $value): self { $this->fields['address_valid_until'] = $value; return $this; }
-    public function setPhone(string $value): self { $this->fields['phone'] = $value; return $this; }
-    public function setPhoneNote(string $value): self { $this->fields['phone_note'] = $value; return $this; }
-    public function setExecPhone(string $value): self { $this->fields['exec_phone'] = $value; return $this; }
-    public function setExecPhoneNote(string $value): self { $this->fields['exec_phone_note'] = $value; return $this; }
-    public function setEmail(string $value): self { $this->fields['email'] = $value; return $this; }
-    public function setEmailNote(string $value): self { $this->fields['email_note'] = $value; return $this; }
-    public function setWebsite(string $value): self { $this->fields['website'] = $value; return $this; }
-    public function setWebsiteNote(string $value): self { $this->fields['website_note'] = $value; return $this; }
-    public function setFax(string $value): self { $this->fields['fax'] = $value; return $this; }
-    public function setFaxNote(string $value): self { $this->fields['fax_note'] = $value; return $this; }
-    public function setOtherContact(string $value): self { $this->fields['other_contact'] = $value; return $this; }
-    public function setOtherContactNote(string $value): self { $this->fields['other_contact_note'] = $value; return $this; }
+    public function setAccountNumber(string $value) : self
+    {
+        $this->fields['account_number'] = $value;
+        return $this;
+    }
+
+    public function setCompanyName(string $value) : self
+    {
+        $this->fields['company_name'] = $value;
+        return $this;
+    }
+
+    public function setBusinessPurpose(string $value) : self
+    {
+        $this->fields['business_purpose'] = $value;
+        return $this;
+    }
+
+    public function setPersonLastName(string $value) : self
+    {
+        $this->fields['person_last_name'] = $value;
+        return $this;
+    }
+
+    public function setPersonFirstName(string $value) : self
+    {
+        $this->fields['person_first_name'] = $value;
+        return $this;
+    }
+
+    public function setUnknownLastName(string $value) : self
+    {
+        $this->fields['unknown_last_name'] = $value;
+        return $this;
+    }
+
+    public function setPartyType(string $value) : self
+    {
+        $this->fields['party_type'] = $value;
+        return $this;
+    }
+
+    public function setShortName(string $value) : self
+    {
+        $this->fields['short_name'] = $value;
+        return $this;
+    }
+
+    public function setEuCountry(string $value) : self
+    {
+        $this->fields['eu_country'] = $value;
+        return $this;
+    }
+
+    public function setEuVatId(string $value) : self
+    {
+        $this->fields['eu_vat_id'] = $value;
+        return $this;
+    }
+
+    public function setSalutation(string $value) : self
+    {
+        $this->fields['salutation'] = $value;
+        return $this;
+    }
+
+    public function setTitle(string $value) : self
+    {
+        $this->fields['title'] = $value;
+        return $this;
+    }
+
+    public function setNobilityTitle(string $value) : self
+    {
+        $this->fields['nobility_title'] = $value;
+        return $this;
+    }
+
+    public function setPrefix(string $value) : self
+    {
+        $this->fields['prefix'] = $value;
+        return $this;
+    }
+
+    public function setAddressType(string $value) : self
+    {
+        $this->fields['address_type'] = $value;
+        return $this;
+    }
+
+    public function setStreet(string $value) : self
+    {
+        $this->fields['street'] = $value;
+        return $this;
+    }
+
+    public function setPob(string $value) : self
+    {
+        $this->fields['pob'] = $value;
+        return $this;
+    }
+
+    public function setPostalCode(string $value) : self
+    {
+        $this->fields['postal_code'] = $value;
+        return $this;
+    }
+
+    public function setCity(string $value) : self
+    {
+        $this->fields['city'] = $value;
+        return $this;
+    }
+
+    public function setCountry(string $value) : self
+    {
+        $this->fields['country'] = $value;
+        return $this;
+    }
+
+    public function setAdditionalDelivery(string $value) : self
+    {
+        $this->fields['additional_delivery'] = $value;
+        return $this;
+    }
+
+    public function setAdditionalAddress(string $value) : self
+    {
+        $this->fields['additional_address'] = $value;
+        return $this;
+    }
+
+    public function setAltSalutation(string $value) : self
+    {
+        $this->fields['alt_salutation'] = $value;
+        return $this;
+    }
+
+    public function setAltDelivery1(string $value) : self
+    {
+        $this->fields['alt_delivery_1'] = $value;
+        return $this;
+    }
+
+    public function setAltDelivery2(string $value) : self
+    {
+        $this->fields['alt_delivery_2'] = $value;
+        return $this;
+    }
+
+    public function setIsCorrespondenceAddress(string $value) : self
+    {
+        $this->fields['is_correspondence_address'] = $value;
+        return $this;
+    }
+
+    public function setAddressValidFrom(\DateTime $value) : self
+    {
+        $this->fields['address_valid_from'] = $value;
+        return $this;
+    }
+
+    public function setAddressValidUntil(\DateTime $value) : self
+    {
+        $this->fields['address_valid_until'] = $value;
+        return $this;
+    }
+
+    public function setPhone(string $value) : self
+    {
+        $this->fields['phone'] = $value;
+        return $this;
+    }
+
+    public function setPhoneNote(string $value) : self
+    {
+        $this->fields['phone_note'] = $value;
+        return $this;
+    }
+
+    public function setExecPhone(string $value) : self
+    {
+        $this->fields['exec_phone'] = $value;
+        return $this;
+    }
+
+    public function setExecPhoneNote(string $value) : self
+    {
+        $this->fields['exec_phone_note'] = $value;
+        return $this;
+    }
+
+    public function setEmail(string $value) : self
+    {
+        $this->fields['email'] = $value;
+        return $this;
+    }
+
+    public function setEmailNote(string $value) : self
+    {
+        $this->fields['email_note'] = $value;
+        return $this;
+    }
+
+    public function setWebsite(string $value) : self
+    {
+        $this->fields['website'] = $value;
+        return $this;
+    }
+
+    public function setWebsiteNote(string $value) : self
+    {
+        $this->fields['website_note'] = $value;
+        return $this;
+    }
+
+    public function setFax(string $value) : self
+    {
+        $this->fields['fax'] = $value;
+        return $this;
+    }
+
+    public function setFaxNote(string $value) : self
+    {
+        $this->fields['fax_note'] = $value;
+        return $this;
+    }
+
+    public function setOtherContact(string $value) : self
+    {
+        $this->fields['other_contact'] = $value;
+        return $this;
+    }
+
+    public function setOtherContactNote(string $value) : self
+    {
+        $this->fields['other_contact_note'] = $value;
+        return $this;
+    }
 
     // Bank account 1
-    public function setBankCode1(string $value): self { $this->fields['bank_code_1'] = $value; return $this; }
-    public function setBankName1(string $value): self { $this->fields['bank_name_1'] = $value; return $this; }
-    public function setBankAccount1(string $value): self { $this->fields['bank_account_1'] = $value; return $this; }
-    public function setBankCountry1(string $value): self { $this->fields['bank_country_1'] = $value; return $this; }
-    public function setIban1(string $value): self { $this->fields['iban_1'] = $value; return $this; }
-    public function setSwift1(string $value): self { $this->fields['swift_1'] = $value; return $this; }
-    public function setDifferentAccountHolder1(string $value): self { $this->fields['different_account_holder_1'] = $value; return $this; }
-    public function setIsMainBankAccount1(string $value): self { $this->fields['is_main_bank_account_1'] = $value; return $this; }
-    public function setBankValidFrom1(string $value): self { $this->fields['bank_valid_from_1'] = $value; return $this; }
-    public function setBankValidUntil1(string $value): self { $this->fields['bank_valid_until_1'] = $value; return $this; }
+    public function setBankCode1(string $value) : self
+    {
+        $this->fields['bank_code_1'] = $value;
+        return $this;
+    }
+
+    public function setBankName1(string $value) : self
+    {
+        $this->fields['bank_name_1'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount1(string $value) : self
+    {
+        $this->fields['bank_account_1'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry1(string $value) : self
+    {
+        $this->fields['bank_country_1'] = $value;
+        return $this;
+    }
+
+    public function setIban1(string $value) : self
+    {
+        $this->fields['iban_1'] = $value;
+        return $this;
+    }
+
+    public function setSwift1(string $value) : self
+    {
+        $this->fields['swift_1'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder1(string $value) : self
+    {
+        $this->fields['different_account_holder_1'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount1(string $value) : self
+    {
+        $this->fields['is_main_bank_account_1'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom1(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_1'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil1(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_1'] = $value;
+        return $this;
+    }
 
     // Bank account 2
-    public function setBankCode2(string $value): self { $this->fields['bank_code_2'] = $value; return $this; }
-    public function setBankName2(string $value): self { $this->fields['bank_name_2'] = $value; return $this; }
-    public function setBankAccount2(string $value): self { $this->fields['bank_account_2'] = $value; return $this; }
-    public function setBankCountry2(string $value): self { $this->fields['bank_country_2'] = $value; return $this; }
-    public function setIban2(string $value): self { $this->fields['iban_2'] = $value; return $this; }
-    public function setSwift2(string $value): self { $this->fields['swift_2'] = $value; return $this; }
-    public function setDifferentAccountHolder2(string $value): self { $this->fields['different_account_holder_2'] = $value; return $this; }
-    public function setIsMainBankAccount2(string $value): self { $this->fields['is_main_bank_account_2'] = $value; return $this; }
-    public function setBankValidFrom2(string $value): self { $this->fields['bank_valid_from_2'] = $value; return $this; }
-    public function setBankValidUntil2(string $value): self { $this->fields['bank_valid_until_2'] = $value; return $this; }
+    public function setBankCode2(string $value) : self
+    {
+        $this->fields['bank_code_2'] = $value;
+        return $this;
+    }
+
+    public function setBankName2(string $value) : self
+    {
+        $this->fields['bank_name_2'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount2(string $value) : self
+    {
+        $this->fields['bank_account_2'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry2(string $value) : self
+    {
+        $this->fields['bank_country_2'] = $value;
+        return $this;
+    }
+
+    public function setIban2(string $value) : self
+    {
+        $this->fields['iban_2'] = $value;
+        return $this;
+    }
+
+    public function setSwift2(string $value) : self
+    {
+        $this->fields['swift_2'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder2(string $value) : self
+    {
+        $this->fields['different_account_holder_2'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount2(string $value) : self
+    {
+        $this->fields['is_main_bank_account_2'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom2(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_2'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil2(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_2'] = $value;
+        return $this;
+    }
 
     // Bank account 3
-    public function setBankCode3(string $value): self { $this->fields['bank_code_3'] = $value; return $this; }
-    public function setBankName3(string $value): self { $this->fields['bank_name_3'] = $value; return $this; }
-    public function setBankAccount3(string $value): self { $this->fields['bank_account_3'] = $value; return $this; }
-    public function setBankCountry3(string $value): self { $this->fields['bank_country_3'] = $value; return $this; }
-    public function setIban3(string $value): self { $this->fields['iban_3'] = $value; return $this; }
-    public function setSwift3(string $value): self { $this->fields['swift_3'] = $value; return $this; }
-    public function setDifferentAccountHolder3(string $value): self { $this->fields['different_account_holder_3'] = $value; return $this; }
-    public function setIsMainBankAccount3(string $value): self { $this->fields['is_main_bank_account_3'] = $value; return $this; }
-    public function setBankValidFrom3(string $value): self { $this->fields['bank_valid_from_3'] = $value; return $this; }
-    public function setBankValidUntil3(string $value): self { $this->fields['bank_valid_until_3'] = $value; return $this; }
+    public function setBankCode3(string $value) : self
+    {
+        $this->fields['bank_code_3'] = $value;
+        return $this;
+    }
+
+    public function setBankName3(string $value) : self
+    {
+        $this->fields['bank_name_3'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount3(string $value) : self
+    {
+        $this->fields['bank_account_3'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry3(string $value) : self
+    {
+        $this->fields['bank_country_3'] = $value;
+        return $this;
+    }
+
+    public function setIban3(string $value) : self
+    {
+        $this->fields['iban_3'] = $value;
+        return $this;
+    }
+
+    public function setSwift3(string $value) : self
+    {
+        $this->fields['swift_3'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder3(string $value) : self
+    {
+        $this->fields['different_account_holder_3'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount3(string $value) : self
+    {
+        $this->fields['is_main_bank_account_3'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom3(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_3'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil3(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_3'] = $value;
+        return $this;
+    }
 
     // Bank account 4
-    public function setBankCode4(string $value): self { $this->fields['bank_code_4'] = $value; return $this; }
-    public function setBankName4(string $value): self { $this->fields['bank_name_4'] = $value; return $this; }
-    public function setBankAccount4(string $value): self { $this->fields['bank_account_4'] = $value; return $this; }
-    public function setBankCountry4(string $value): self { $this->fields['bank_country_4'] = $value; return $this; }
-    public function setIban4(string $value): self { $this->fields['iban_4'] = $value; return $this; }
-    public function setSwift4(string $value): self { $this->fields['swift_4'] = $value; return $this; }
-    public function setDifferentAccountHolder4(string $value): self { $this->fields['different_account_holder_4'] = $value; return $this; }
-    public function setIsMainBankAccount4(string $value): self { $this->fields['is_main_bank_account_4'] = $value; return $this; }
-    public function setBankValidFrom4(string $value): self { $this->fields['bank_valid_from_4'] = $value; return $this; }
-    public function setBankValidUntil4(string $value): self { $this->fields['bank_valid_until_4'] = $value; return $this; }
+    public function setBankCode4(string $value) : self
+    {
+        $this->fields['bank_code_4'] = $value;
+        return $this;
+    }
+
+    public function setBankName4(string $value) : self
+    {
+        $this->fields['bank_name_4'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount4(string $value) : self
+    {
+        $this->fields['bank_account_4'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry4(string $value) : self
+    {
+        $this->fields['bank_country_4'] = $value;
+        return $this;
+    }
+
+    public function setIban4(string $value) : self
+    {
+        $this->fields['iban_4'] = $value;
+        return $this;
+    }
+
+    public function setSwift4(string $value) : self
+    {
+        $this->fields['swift_4'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder4(string $value) : self
+    {
+        $this->fields['different_account_holder_4'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount4(string $value) : self
+    {
+        $this->fields['is_main_bank_account_4'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom4(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_4'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil4(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_4'] = $value;
+        return $this;
+    }
 
     // Bank account 5
-    public function setBankCode5(string $value): self { $this->fields['bank_code_5'] = $value; return $this; }
-    public function setBankName5(string $value): self { $this->fields['bank_name_5'] = $value; return $this; }
-    public function setBankAccount5(string $value): self { $this->fields['bank_account_5'] = $value; return $this; }
-    public function setBankCountry5(string $value): self { $this->fields['bank_country_5'] = $value; return $this; }
-    public function setIban5(string $value): self { $this->fields['iban_5'] = $value; return $this; }
-    public function setSwift5(string $value): self { $this->fields['swift_5'] = $value; return $this; }
-    public function setDifferentAccountHolder5(string $value): self { $this->fields['different_account_holder_5'] = $value; return $this; }
-    public function setIsMainBankAccount5(string $value): self { $this->fields['is_main_bank_account_5'] = $value; return $this; }
-    public function setBankValidFrom5(string $value): self { $this->fields['bank_valid_from_5'] = $value; return $this; }
-    public function setBankValidUntil5(string $value): self { $this->fields['bank_valid_until_5'] = $value; return $this; }
+    public function setBankCode5(string $value) : self
+    {
+        $this->fields['bank_code_5'] = $value;
+        return $this;
+    }
+
+    public function setBankName5(string $value) : self
+    {
+        $this->fields['bank_name_5'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount5(string $value) : self
+    {
+        $this->fields['bank_account_5'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry5(string $value) : self
+    {
+        $this->fields['bank_country_5'] = $value;
+        return $this;
+    }
+
+    public function setIban5(string $value) : self
+    {
+        $this->fields['iban_5'] = $value;
+        return $this;
+    }
+
+    public function setSwift5(string $value) : self
+    {
+        $this->fields['swift_5'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder5(string $value) : self
+    {
+        $this->fields['different_account_holder_5'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount5(string $value) : self
+    {
+        $this->fields['is_main_bank_account_5'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom5(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_5'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil5(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_5'] = $value;
+        return $this;
+    }
 
     // Additional fields after bank accounts
-    public function setLetterSalutation(string $value): self { $this->fields['letter_salutation'] = $value; return $this; }
-    public function setGreetingFormula(string $value): self { $this->fields['greeting_formula'] = $value; return $this; }
-    public function setCustomerNumber(string $value): self { $this->fields['customer_number'] = $value; return $this; }
-    public function setTaxNumber(string $value): self { $this->fields['tax_number'] = $value; return $this; }
-    public function setLanguage(string $value): self { $this->fields['language'] = $value; return $this; }
-    public function setContactPerson(string $value): self { $this->fields['contact_person'] = $value; return $this; }
-    public function setRepresentative(string $value): self { $this->fields['representative'] = $value; return $this; }
-    public function setClerk(string $value): self { $this->fields['clerk'] = $value; return $this; }
-    public function setDiverseAccount(string $value): self { $this->fields['diverse_account'] = $value; return $this; }
-    public function setOutputMedium(string $value): self { $this->fields['output_medium'] = $value; return $this; }
-    public function setCurrencyControl(string $value): self { $this->fields['currency_control'] = $value; return $this; }
-    public function setCreditLimit(string $value): self { $this->fields['credit_limit'] = $value; return $this; }
-    public function setPaymentCondition(string $value): self { $this->fields['payment_condition'] = $value; return $this; }
-    public function setDebtorDueDays(string $value): self { $this->fields['debtor_due_days'] = $value; return $this; }
-    public function setDebtorDiscountPercent(string $value): self { $this->fields['debtor_discount_percent'] = $value; return $this; }
-    public function setCreditorTarget1Days(string $value): self { $this->fields['creditor_target_1_days'] = $value; return $this; }
-    public function setCreditorDiscount1Percent(string $value): self { $this->fields['creditor_discount_1_percent'] = $value; return $this; }
-    public function setCreditorTarget2Days(string $value): self { $this->fields['creditor_target_2_days'] = $value; return $this; }
-    public function setCreditorDiscount2Percent(string $value): self { $this->fields['creditor_discount_2_percent'] = $value; return $this; }
-    public function setCreditorTarget3GrossDays(string $value): self { $this->fields['creditor_target_3_gross_days'] = $value; return $this; }
-    public function setCreditorTarget4Days(string $value): self { $this->fields['creditor_target_4_days'] = $value; return $this; }
-    public function setCreditorDiscount4Percent(string $value): self { $this->fields['creditor_discount_4_percent'] = $value; return $this; }
-    public function setCreditorTarget5Days(string $value): self { $this->fields['creditor_target_5_days'] = $value; return $this; }
-    public function setCreditorDiscount5Percent(string $value): self { $this->fields['creditor_discount_5_percent'] = $value; return $this; }
+    public function setLetterSalutation(string $value) : self
+    {
+        $this->fields['letter_salutation'] = $value;
+        return $this;
+    }
+
+    public function setGreetingFormula(string $value) : self
+    {
+        $this->fields['greeting_formula'] = $value;
+        return $this;
+    }
+
+    public function setCustomerNumber(string $value) : self
+    {
+        $this->fields['customer_number'] = $value;
+        return $this;
+    }
+
+    public function setTaxNumber(string $value) : self
+    {
+        $this->fields['tax_number'] = $value;
+        return $this;
+    }
+
+    public function setLanguage(string $value) : self
+    {
+        $this->fields['language'] = $value;
+        return $this;
+    }
+
+    public function setContactPerson(string $value) : self
+    {
+        $this->fields['contact_person'] = $value;
+        return $this;
+    }
+
+    public function setRepresentative(string $value) : self
+    {
+        $this->fields['representative'] = $value;
+        return $this;
+    }
+
+    public function setClerk(string $value) : self
+    {
+        $this->fields['clerk'] = $value;
+        return $this;
+    }
+
+    public function setDiverseAccount(string $value) : self
+    {
+        $this->fields['diverse_account'] = $value;
+        return $this;
+    }
+
+    public function setOutputMedium(string $value) : self
+    {
+        $this->fields['output_medium'] = $value;
+        return $this;
+    }
+
+    public function setCurrencyControl(string $value) : self
+    {
+        $this->fields['currency_control'] = $value;
+        return $this;
+    }
+
+    public function setCreditLimit($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'credit_limit' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['credit_limit'] = (float)$value;
+        return $this;
+    }
+
+    public function setPaymentCondition(string $value) : self
+    {
+        $this->fields['payment_condition'] = $value;
+        return $this;
+    }
+
+    public function setDebtorDueDays(string $value) : self
+    {
+        $this->fields['debtor_due_days'] = $value;
+        return $this;
+    }
+
+    public function setDebtorDiscountPercent($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'debtor_discount_percent' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['debtor_discount_percent'] = (float)$value;
+        return $this;
+    }
+
+    public function setCreditorTarget1Days(string $value) : self
+    {
+        $this->fields['creditor_target_1_days'] = $value;
+        return $this;
+    }
+
+    public function setCreditorDiscount1Percent($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'creditor_discount_1_percent' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['creditor_discount_1_percent'] = (float)$value;
+        return $this;
+    }
+
+    public function setCreditorTarget2Days(string $value) : self
+    {
+        $this->fields['creditor_target_2_days'] = $value;
+        return $this;
+    }
+
+    public function setCreditorDiscount2Percent($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'creditor_discount_2_percent' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['creditor_discount_2_percent'] = (float)$value;
+        return $this;
+    }
+
+    public function setCreditorTarget3GrossDays(string $value) : self
+    {
+        $this->fields['creditor_target_3_gross_days'] = $value;
+        return $this;
+    }
+
+    public function setCreditorTarget4Days(string $value) : self
+    {
+        $this->fields['creditor_target_4_days'] = $value;
+        return $this;
+    }
+
+    public function setCreditorDiscount4Percent($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'creditor_discount_4_percent' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['creditor_discount_4_percent'] = (float)$value;
+        return $this;
+    }
+
+    public function setCreditorTarget5Days(string $value) : self
+    {
+        $this->fields['creditor_target_5_days'] = $value;
+        return $this;
+    }
+
+    public function setCreditorDiscount5Percent($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'creditor_discount_5_percent' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['creditor_discount_5_percent'] = (float)$value;
+        return $this;
+    }
 
     // Reminder settings
-    public function setReminder(string $value): self { $this->fields['reminder'] = $value; return $this; }
-    public function setAccountStatement(string $value): self { $this->fields['account_statement'] = $value; return $this; }
-    public function setReminderText1(string $value): self { $this->fields['reminder_text_1'] = $value; return $this; }
-    public function setReminderText2(string $value): self { $this->fields['reminder_text_2'] = $value; return $this; }
-    public function setReminderText3(string $value): self { $this->fields['reminder_text_3'] = $value; return $this; }
-    public function setAccountStatementText(string $value): self { $this->fields['account_statement_text'] = $value; return $this; }
-    public function setReminderLimitAmount(string $value): self { $this->fields['reminder_limit_amount'] = $value; return $this; }
-    public function setReminderLimitPercent(string $value): self { $this->fields['reminder_limit_percent'] = $value; return $this; }
-    public function setInterestCalculation(string $value): self { $this->fields['interest_calculation'] = $value; return $this; }
-    public function setInterestRate1(string $value): self { $this->fields['interest_rate_1'] = $value; return $this; }
-    public function setInterestRate2(string $value): self { $this->fields['interest_rate_2'] = $value; return $this; }
-    public function setInterestRate3(string $value): self { $this->fields['interest_rate_3'] = $value; return $this; }
+    public function setReminder(string $value) : self
+    {
+        $this->fields['reminder'] = $value;
+        return $this;
+    }
+
+    public function setAccountStatement(string $value) : self
+    {
+        $this->fields['account_statement'] = $value;
+        return $this;
+    }
+
+    public function setReminderText1(string $value) : self
+    {
+        $this->fields['reminder_text_1'] = $value;
+        return $this;
+    }
+
+    public function setReminderText2(string $value) : self
+    {
+        $this->fields['reminder_text_2'] = $value;
+        return $this;
+    }
+
+    public function setReminderText3(string $value) : self
+    {
+        $this->fields['reminder_text_3'] = $value;
+        return $this;
+    }
+
+    public function setAccountStatementText(string $value) : self
+    {
+        $this->fields['account_statement_text'] = $value;
+        return $this;
+    }
+
+    public function setReminderLimitAmount($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'reminder_limit_amount' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['reminder_limit_amount'] = (float)$value;
+        return $this;
+    }
+
+    public function setReminderLimitPercent($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'reminder_limit_percent' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['reminder_limit_percent'] = (float)$value;
+        return $this;
+    }
+
+    public function setInterestCalculation(string $value) : self
+    {
+        $this->fields['interest_calculation'] = $value;
+        return $this;
+    }
+
+    public function setInterestRate1($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'interest_rate_1' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['interest_rate_1'] = (float)$value;
+        return $this;
+    }
+
+    public function setInterestRate2($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'interest_rate_2' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['interest_rate_2'] = (float)$value;
+        return $this;
+    }
+
+    public function setInterestRate3($value) : self
+    {
+        if (!is_float($value) && !is_int($value)) {
+            throw new \InvalidArgumentException("Für das Feld 'interest_rate_3' wird ein numerischer Wert (float oder int) erwartet");
+        }
+        $this->fields['interest_rate_3'] = (float)$value;
+        return $this;
+    }
 
     // Payment processing
-    public function setDirectDebit(string $value): self { $this->fields['direct_debit'] = $value; return $this; }
-    public function setClientBank(string $value): self { $this->fields['client_bank'] = $value; return $this; }
-    public function setPaymentCarrier(string $value): self { $this->fields['payment_carrier'] = $value; return $this; }
+    public function setDirectDebit(string $value) : self
+    {
+        $this->fields['direct_debit'] = $value;
+        return $this;
+    }
+
+    public function setClientBank(string $value) : self
+    {
+        $this->fields['client_bank'] = $value;
+        return $this;
+    }
+
+    public function setPaymentCarrier(string $value) : self
+    {
+        $this->fields['payment_carrier'] = $value;
+        return $this;
+    }
 
     // Individual fields
-    public function setIndField1(string $value): self { $this->fields['ind_field_1'] = $value; return $this; }
-    public function setIndField2(string $value): self { $this->fields['ind_field_2'] = $value; return $this; }
-    public function setIndField3(string $value): self { $this->fields['ind_field_3'] = $value; return $this; }
-    public function setIndField4(string $value): self { $this->fields['ind_field_4'] = $value; return $this; }
-    public function setIndField5(string $value): self { $this->fields['ind_field_5'] = $value; return $this; }
-    public function setIndField6(string $value): self { $this->fields['ind_field_6'] = $value; return $this; }
-    public function setIndField7(string $value): self { $this->fields['ind_field_7'] = $value; return $this; }
-    public function setIndField8(string $value): self { $this->fields['ind_field_8'] = $value; return $this; }
-    public function setIndField9(string $value): self { $this->fields['ind_field_9'] = $value; return $this; }
-    public function setIndField10(string $value): self { $this->fields['ind_field_10'] = $value; return $this; }
-    public function setIndField11(string $value): self { $this->fields['ind_field_11'] = $value; return $this; }
-    public function setIndField12(string $value): self { $this->fields['ind_field_12'] = $value; return $this; }
-    public function setIndField13(string $value): self { $this->fields['ind_field_13'] = $value; return $this; }
-    public function setIndField14(string $value): self { $this->fields['ind_field_14'] = $value; return $this; }
-    public function setIndField15(string $value): self { $this->fields['ind_field_15'] = $value; return $this; }
+    public function setIndField1(string $value) : self
+    {
+        $this->fields['ind_field_1'] = $value;
+        return $this;
+    }
+
+    public function setIndField2(string $value) : self
+    {
+        $this->fields['ind_field_2'] = $value;
+        return $this;
+    }
+
+    public function setIndField3(string $value) : self
+    {
+        $this->fields['ind_field_3'] = $value;
+        return $this;
+    }
+
+    public function setIndField4(string $value) : self
+    {
+        $this->fields['ind_field_4'] = $value;
+        return $this;
+    }
+
+    public function setIndField5(string $value) : self
+    {
+        $this->fields['ind_field_5'] = $value;
+        return $this;
+    }
+
+    public function setIndField6(string $value) : self
+    {
+        $this->fields['ind_field_6'] = $value;
+        return $this;
+    }
+
+    public function setIndField7(string $value) : self
+    {
+        $this->fields['ind_field_7'] = $value;
+        return $this;
+    }
+
+    public function setIndField8(string $value) : self
+    {
+        $this->fields['ind_field_8'] = $value;
+        return $this;
+    }
+
+    public function setIndField9(string $value) : self
+    {
+        $this->fields['ind_field_9'] = $value;
+        return $this;
+    }
+
+    public function setIndField10(string $value) : self
+    {
+        $this->fields['ind_field_10'] = $value;
+        return $this;
+    }
+
+    public function setIndField11(string $value) : self
+    {
+        $this->fields['ind_field_11'] = $value;
+        return $this;
+    }
+
+    public function setIndField12(string $value) : self
+    {
+        $this->fields['ind_field_12'] = $value;
+        return $this;
+    }
+
+    public function setIndField13(string $value) : self
+    {
+        $this->fields['ind_field_13'] = $value;
+        return $this;
+    }
+
+    public function setIndField14(string $value) : self
+    {
+        $this->fields['ind_field_14'] = $value;
+        return $this;
+    }
+
+    public function setIndField15(string $value) : self
+    {
+        $this->fields['ind_field_15'] = $value;
+        return $this;
+    }
 
     // Invoice address fields
-    public function setAltSalutationInvoice(string $value): self { $this->fields['alt_salutation_invoice'] = $value; return $this; }
-    public function setAddressTypeInvoice(string $value): self { $this->fields['address_type_invoice'] = $value; return $this; }
-    public function setStreetInvoice(string $value): self { $this->fields['street_invoice'] = $value; return $this; }
-    public function setPobInvoice(string $value): self { $this->fields['pob_invoice'] = $value; return $this; }
-    public function setPostalCodeInvoice(string $value): self { $this->fields['postal_code_invoice'] = $value; return $this; }
-    public function setCityInvoice(string $value): self { $this->fields['city_invoice'] = $value; return $this; }
-    public function setCountryInvoice(string $value): self { $this->fields['country_invoice'] = $value; return $this; }
-    public function setAdditionalDeliveryInvoice(string $value): self { $this->fields['additional_delivery_invoice'] = $value; return $this; }
-    public function setAdditionalAddressInvoice(string $value): self { $this->fields['additional_address_invoice'] = $value; return $this; }
-    public function setAltDelivery1Invoice(string $value): self { $this->fields['alt_delivery_1_invoice'] = $value; return $this; }
-    public function setAltDelivery2Invoice(string $value): self { $this->fields['alt_delivery_2_invoice'] = $value; return $this; }
-    public function setAddressValidFromInvoice(string $value): self { $this->fields['address_valid_from_invoice'] = $value; return $this; }
-    public function setAddressValidUntilInvoice(string $value): self { $this->fields['address_valid_until_invoice'] = $value; return $this; }
+    public function setAltSalutationInvoice(string $value) : self
+    {
+        $this->fields['alt_salutation_invoice'] = $value;
+        return $this;
+    }
+
+    public function setAddressTypeInvoice(string $value) : self
+    {
+        $this->fields['address_type_invoice'] = $value;
+        return $this;
+    }
+
+    public function setStreetInvoice(string $value) : self
+    {
+        $this->fields['street_invoice'] = $value;
+        return $this;
+    }
+
+    public function setPobInvoice(string $value) : self
+    {
+        $this->fields['pob_invoice'] = $value;
+        return $this;
+    }
+
+    public function setPostalCodeInvoice(string $value) : self
+    {
+        $this->fields['postal_code_invoice'] = $value;
+        return $this;
+    }
+
+    public function setCityInvoice(string $value) : self
+    {
+        $this->fields['city_invoice'] = $value;
+        return $this;
+    }
+
+    public function setCountryInvoice(string $value) : self
+    {
+        $this->fields['country_invoice'] = $value;
+        return $this;
+    }
+
+    public function setAdditionalDeliveryInvoice(string $value) : self
+    {
+        $this->fields['additional_delivery_invoice'] = $value;
+        return $this;
+    }
+
+    public function setAdditionalAddressInvoice(string $value) : self
+    {
+        $this->fields['additional_address_invoice'] = $value;
+        return $this;
+    }
+
+    public function setAltDelivery1Invoice(string $value) : self
+    {
+        $this->fields['alt_delivery_1_invoice'] = $value;
+        return $this;
+    }
+
+    public function setAltDelivery2Invoice(string $value) : self
+    {
+        $this->fields['alt_delivery_2_invoice'] = $value;
+        return $this;
+    }
+
+    public function setAddressValidFromInvoice(\DateTime $value) : self
+    {
+        $this->fields['address_valid_from_invoice'] = $value;
+        return $this;
+    }
+
+    public function setAddressValidUntilInvoice(\DateTime $value) : self
+    {
+        $this->fields['address_valid_until_invoice'] = $value;
+        return $this;
+    }
 
     // Bank account 6
-    public function setBankCode6(string $value): self { $this->fields['bank_code_6'] = $value; return $this; }
-    public function setBankName6(string $value): self { $this->fields['bank_name_6'] = $value; return $this; }
-    public function setBankAccount6(string $value): self { $this->fields['bank_account_6'] = $value; return $this; }
-    public function setBankCountry6(string $value): self { $this->fields['bank_country_6'] = $value; return $this; }
-    public function setIban6(string $value): self { $this->fields['iban_6'] = $value; return $this; }
-    public function setSwift6(string $value): self { $this->fields['swift_6'] = $value; return $this; }
-    public function setDifferentAccountHolder6(string $value): self { $this->fields['different_account_holder_6'] = $value; return $this; }
-    public function setIsMainBankAccount6(string $value): self { $this->fields['is_main_bank_account_6'] = $value; return $this; }
-    public function setBankValidFrom6(string $value): self { $this->fields['bank_valid_from_6'] = $value; return $this; }
-    public function setBankValidUntil6(string $value): self { $this->fields['bank_valid_until_6'] = $value; return $this; }
+    public function setBankCode6(string $value) : self
+    {
+        $this->fields['bank_code_6'] = $value;
+        return $this;
+    }
+
+    public function setBankName6(string $value) : self
+    {
+        $this->fields['bank_name_6'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount6(string $value) : self
+    {
+        $this->fields['bank_account_6'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry6(string $value) : self
+    {
+        $this->fields['bank_country_6'] = $value;
+        return $this;
+    }
+
+    public function setIban6(string $value) : self
+    {
+        $this->fields['iban_6'] = $value;
+        return $this;
+    }
+
+    public function setSwift6(string $value) : self
+    {
+        $this->fields['swift_6'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder6(string $value) : self
+    {
+        $this->fields['different_account_holder_6'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount6(string $value) : self
+    {
+        $this->fields['is_main_bank_account_6'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom6(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_6'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil6(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_6'] = $value;
+        return $this;
+    }
 
     // Bank account 7
-    public function setBankCode7(string $value): self { $this->fields['bank_code_7'] = $value; return $this; }
-    public function setBankName7(string $value): self { $this->fields['bank_name_7'] = $value; return $this; }
-    public function setBankAccount7(string $value): self { $this->fields['bank_account_7'] = $value; return $this; }
-    public function setBankCountry7(string $value): self { $this->fields['bank_country_7'] = $value; return $this; }
-    public function setIban7(string $value): self { $this->fields['iban_7'] = $value; return $this; }
-    public function setSwift7(string $value): self { $this->fields['swift_7'] = $value; return $this; }
-    public function setDifferentAccountHolder7(string $value): self { $this->fields['different_account_holder_7'] = $value; return $this; }
-    public function setIsMainBankAccount7(string $value): self { $this->fields['is_main_bank_account_7'] = $value; return $this; }
-    public function setBankValidFrom7(string $value): self { $this->fields['bank_valid_from_7'] = $value; return $this; }
-    public function setBankValidUntil7(string $value): self { $this->fields['bank_valid_until_7'] = $value; return $this; }
+    public function setBankCode7(string $value) : self
+    {
+        $this->fields['bank_code_7'] = $value;
+        return $this;
+    }
+
+    public function setBankName7(string $value) : self
+    {
+        $this->fields['bank_name_7'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount7(string $value) : self
+    {
+        $this->fields['bank_account_7'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry7(string $value) : self
+    {
+        $this->fields['bank_country_7'] = $value;
+        return $this;
+    }
+
+    public function setIban7(string $value) : self
+    {
+        $this->fields['iban_7'] = $value;
+        return $this;
+    }
+
+    public function setSwift7(string $value) : self
+    {
+        $this->fields['swift_7'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder7(string $value) : self
+    {
+        $this->fields['different_account_holder_7'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount7(string $value) : self
+    {
+        $this->fields['is_main_bank_account_7'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom7(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_7'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil7(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_7'] = $value;
+        return $this;
+    }
 
     // Bank account 8
-    public function setBankCode8(string $value): self { $this->fields['bank_code_8'] = $value; return $this; }
-    public function setBankName8(string $value): self { $this->fields['bank_name_8'] = $value; return $this; }
-    public function setBankAccount8(string $value): self { $this->fields['bank_account_8'] = $value; return $this; }
-    public function setBankCountry8(string $value): self { $this->fields['bank_country_8'] = $value; return $this; }
-    public function setIban8(string $value): self { $this->fields['iban_8'] = $value; return $this; }
-    public function setSwift8(string $value): self { $this->fields['swift_8'] = $value; return $this; }
-    public function setDifferentAccountHolder8(string $value): self { $this->fields['different_account_holder_8'] = $value; return $this; }
-    public function setIsMainBankAccount8(string $value): self { $this->fields['is_main_bank_account_8'] = $value; return $this; }
-    public function setBankValidFrom8(string $value): self { $this->fields['bank_valid_from_8'] = $value; return $this; }
-    public function setBankValidUntil8(string $value): self { $this->fields['bank_valid_until_8'] = $value; return $this; }
+    public function setBankCode8(string $value) : self
+    {
+        $this->fields['bank_code_8'] = $value;
+        return $this;
+    }
+
+    public function setBankName8(string $value) : self
+    {
+        $this->fields['bank_name_8'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount8(string $value) : self
+    {
+        $this->fields['bank_account_8'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry8(string $value) : self
+    {
+        $this->fields['bank_country_8'] = $value;
+        return $this;
+    }
+
+    public function setIban8(string $value) : self
+    {
+        $this->fields['iban_8'] = $value;
+        return $this;
+    }
+
+    public function setSwift8(string $value) : self
+    {
+        $this->fields['swift_8'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder8(string $value) : self
+    {
+        $this->fields['different_account_holder_8'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount8(string $value) : self
+    {
+        $this->fields['is_main_bank_account_8'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom8(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_8'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil8(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_8'] = $value;
+        return $this;
+    }
 
     // Bank account 9
-    public function setBankCode9(string $value): self { $this->fields['bank_code_9'] = $value; return $this; }
-    public function setBankName9(string $value): self { $this->fields['bank_name_9'] = $value; return $this; }
-    public function setBankAccount9(string $value): self { $this->fields['bank_account_9'] = $value; return $this; }
-    public function setBankCountry9(string $value): self { $this->fields['bank_country_9'] = $value; return $this; }
-    public function setIban9(string $value): self { $this->fields['iban_9'] = $value; return $this; }
-    public function setSwift9(string $value): self { $this->fields['swift_9'] = $value; return $this; }
-    public function setDifferentAccountHolder9(string $value): self { $this->fields['different_account_holder_9'] = $value; return $this; }
-    public function setIsMainBankAccount9(string $value): self { $this->fields['is_main_bank_account_9'] = $value; return $this; }
-    public function setBankValidFrom9(string $value): self { $this->fields['bank_valid_from_9'] = $value; return $this; }
-    public function setBankValidUntil9(string $value): self { $this->fields['bank_valid_until_9'] = $value; return $this; }
+    public function setBankCode9(string $value) : self
+    {
+        $this->fields['bank_code_9'] = $value;
+        return $this;
+    }
+
+    public function setBankName9(string $value) : self
+    {
+        $this->fields['bank_name_9'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount9(string $value) : self
+    {
+        $this->fields['bank_account_9'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry9(string $value) : self
+    {
+        $this->fields['bank_country_9'] = $value;
+        return $this;
+    }
+
+    public function setIban9(string $value) : self
+    {
+        $this->fields['iban_9'] = $value;
+        return $this;
+    }
+
+    public function setSwift9(string $value) : self
+    {
+        $this->fields['swift_9'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder9(string $value) : self
+    {
+        $this->fields['different_account_holder_9'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount9(string $value) : self
+    {
+        $this->fields['is_main_bank_account_9'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom9(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_9'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil9(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_9'] = $value;
+        return $this;
+    }
 
     // Bank account 10
-    public function setBankCode10(string $value): self { $this->fields['bank_code_10'] = $value; return $this; }
-    public function setBankName10(string $value): self { $this->fields['bank_name_10'] = $value; return $this; }
-    public function setBankAccount10(string $value): self { $this->fields['bank_account_10'] = $value; return $this; }
-    public function setBankCountry10(string $value): self { $this->fields['bank_country_10'] = $value; return $this; }
-    public function setIban10(string $value): self { $this->fields['iban_10'] = $value; return $this; }
-    public function setSwift10(string $value): self { $this->fields['swift_10'] = $value; return $this; }
-    public function setDifferentAccountHolder10(string $value): self { $this->fields['different_account_holder_10'] = $value; return $this; }
-    public function setIsMainBankAccount10(string $value): self { $this->fields['is_main_bank_account_10'] = $value; return $this; }
-    public function setBankValidFrom10(string $value): self { $this->fields['bank_valid_from_10'] = $value; return $this; }
-    public function setBankValidUntil10(string $value): self { $this->fields['bank_valid_until_10'] = $value; return $this; }
+    public function setBankCode10(string $value) : self
+    {
+        $this->fields['bank_code_10'] = $value;
+        return $this;
+    }
+
+    public function setBankName10(string $value) : self
+    {
+        $this->fields['bank_name_10'] = $value;
+        return $this;
+    }
+
+    public function setBankAccount10(string $value) : self
+    {
+        $this->fields['bank_account_10'] = $value;
+        return $this;
+    }
+
+    public function setBankCountry10(string $value) : self
+    {
+        $this->fields['bank_country_10'] = $value;
+        return $this;
+    }
+
+    public function setIban10(string $value) : self
+    {
+        $this->fields['iban_10'] = $value;
+        return $this;
+    }
+
+    public function setSwift10(string $value) : self
+    {
+        $this->fields['swift_10'] = $value;
+        return $this;
+    }
+
+    public function setDifferentAccountHolder10(string $value) : self
+    {
+        $this->fields['different_account_holder_10'] = $value;
+        return $this;
+    }
+
+    public function setIsMainBankAccount10(string $value) : self
+    {
+        $this->fields['is_main_bank_account_10'] = $value;
+        return $this;
+    }
+
+    public function setBankValidFrom10(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_from_10'] = $value;
+        return $this;
+    }
+
+    public function setBankValidUntil10(\DateTime $value) : self
+    {
+        $this->fields['bank_valid_until_10'] = $value;
+        return $this;
+    }
 
     // SEPA information
-    public function setExternalSystemNumber(string $value): self { $this->fields['external_system_number'] = $value; return $this; }
-    public function setInsolvent(string $value): self { $this->fields['insolvent'] = $value; return $this; }
-    public function setSepaMandate1(string $value): self { $this->fields['sepa_mandate_reference_1'] = $value; return $this; }
-    public function setSepaMandate2(string $value): self { $this->fields['sepa_mandate_reference_2'] = $value; return $this; }
-    public function setSepaMandate3(string $value): self { $this->fields['sepa_mandate_reference_3'] = $value; return $this; }
-    public function setSepaMandate4(string $value): self { $this->fields['sepa_mandate_reference_4'] = $value; return $this; }
-    public function setSepaMandate5(string $value): self { $this->fields['sepa_mandate_reference_5'] = $value; return $this; }
-    public function setSepaMandate6(string $value): self { $this->fields['sepa_mandate_reference_6'] = $value; return $this; }
-    public function setSepaMandate7(string $value): self { $this->fields['sepa_mandate_reference_7'] = $value; return $this; }
-    public function setSepaMandate8(string $value): self { $this->fields['sepa_mandate_reference_8'] = $value; return $this; }
-    public function setSepaMandate9(string $value): self { $this->fields['sepa_mandate_reference_9'] = $value; return $this; }
-    public function setSepaMandate10(string $value): self { $this->fields['sepa_mandate_reference_10'] = $value; return $this; }
+    public function setExternalSystemNumber(string $value) : self
+    {
+        $this->fields['external_system_number'] = $value;
+        return $this;
+    }
+
+    public function setInsolvent(string $value) : self
+    {
+        $this->fields['insolvent'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate1(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_1'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate2(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_2'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate3(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_3'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate4(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_4'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate5(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_5'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate6(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_6'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate7(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_7'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate8(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_8'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate9(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_9'] = $value;
+        return $this;
+    }
+
+    public function setSepaMandate10(string $value) : self
+    {
+        $this->fields['sepa_mandate_reference_10'] = $value;
+        return $this;
+    }
 
     // Linked accounts and block information
-    public function setLinkedAccount(string $value): self { $this->fields['linked_account'] = $value; return $this; }
-    public function setReminderBlockUntil(string $value): self { $this->fields['reminder_block_until'] = $value; return $this; }
-    public function setDirectDebitBlockUntil(string $value): self { $this->fields['direct_debit_block_until'] = $value; return $this; }
-    public function setPaymentBlockUntil(string $value): self { $this->fields['payment_block_until'] = $value; return $this; }
+    public function setLinkedAccount(string $value) : self
+    {
+        $this->fields['linked_account'] = $value;
+        return $this;
+    }
+
+    public function setReminderBlockUntil(\DateTime $value) : self
+    {
+        $this->fields['reminder_block_until'] = $value;
+        return $this;
+    }
+
+    public function setDirectDebitBlockUntil(\DateTime $value) : self
+    {
+        $this->fields['direct_debit_block_until'] = $value;
+        return $this;
+    }
+
+    public function setPaymentBlockUntil(\DateTime $value) : self
+    {
+        $this->fields['payment_block_until'] = $value;
+        return $this;
+    }
 
     // Fee calculations
-    public function setFeeCalculation(string $value): self { $this->fields['fee_calculation'] = $value; return $this; }
-    public function setReminderFee1(string $value): self { $this->fields['reminder_fee_1'] = $value; return $this; }
-    public function setReminderFee2(string $value): self { $this->fields['reminder_fee_2'] = $value; return $this; }
-    public function setReminderFee3(string $value): self { $this->fields['reminder_fee_3'] = $value; return $this; }
-    public function setDefaultPaymentCalculation(string $value): self { $this->fields['default_payment_calculation'] = $value; return $this; }
-    public function setDefaultPayment1(string $value): self { $this->fields['default_payment_1'] = $value; return $this; }
-    public function setDefaultPayment2(string $value): self { $this->fields['default_payment_2'] = $value; return $this; }
-    public function setDefaultPayment3(string $value): self { $this->fields['default_payment_3'] = $value; return $this; }
+    public function setFeeCalculation(string $value) : self
+    {
+        $this->fields['fee_calculation'] = $value;
+        return $this;
+    }
+
+    public function setReminderFee1(string $value) : self
+    {
+        $this->fields['reminder_fee_1'] = $value;
+        return $this;
+    }
+
+    public function setReminderFee2(string $value) : self
+    {
+        $this->fields['reminder_fee_2'] = $value;
+        return $this;
+    }
+
+    public function setReminderFee3(string $value) : self
+    {
+        $this->fields['reminder_fee_3'] = $value;
+        return $this;
+    }
+
+    public function setDefaultPaymentCalculation(string $value) : self
+    {
+        $this->fields['default_payment_calculation'] = $value;
+        return $this;
+    }
+
+    public function setDefaultPayment1(string $value) : self
+    {
+        $this->fields['default_payment_1'] = $value;
+        return $this;
+    }
+
+    public function setDefaultPayment2(string $value) : self
+    {
+        $this->fields['default_payment_2'] = $value;
+        return $this;
+    }
+
+    public function setDefaultPayment3(string $value) : self
+    {
+        $this->fields['default_payment_3'] = $value;
+        return $this;
+    }
 
     // Search and status
-    public function setAlternativeSearchName(string $value): self { $this->fields['alternative_search_name'] = $value; return $this; }
-    public function setStatus(string $value): self { $this->fields['status'] = $value; return $this; }
+    public function setAlternativeSearchName(string $value) : self
+    {
+        $this->fields['alternative_search_name'] = $value;
+        return $this;
+    }
+
+    public function setStatus(string $value) : self
+    {
+        $this->fields['status'] = $value;
+        return $this;
+    }
 
     // Address information
-    public function setAddressManuallyChanged(string $value): self { $this->fields['address_manually_changed'] = $value; return $this; }
-    public function setAddressIndividual(string $value): self { $this->fields['address_individual'] = $value; return $this; }
-    public function setAddressManuallyChangedInvoice(string $value): self { $this->fields['address_manually_changed_invoice'] = $value; return $this; }
-    public function setAddressIndividualInvoice(string $value): self { $this->fields['address_individual_invoice'] = $value; return $this; }
+    public function setAddressManuallyChanged(string $value) : self
+    {
+        $this->fields['address_manually_changed'] = $value;
+        return $this;
+    }
+
+    public function setAddressIndividual(string $value) : self
+    {
+        $this->fields['address_individual'] = $value;
+        return $this;
+    }
+
+    public function setAddressManuallyChangedInvoice(string $value) : self
+    {
+        $this->fields['address_manually_changed_invoice'] = $value;
+        return $this;
+    }
+
+    public function setAddressIndividualInvoice(string $value) : self
+    {
+        $this->fields['address_individual_invoice'] = $value;
+        return $this;
+    }
 
     // Deadline calculations
-    public function setDeadlineCalculationDebtor(string $value): self { $this->fields['deadline_calculation_debtor'] = $value; return $this; }
-    public function setReminderDeadline1(string $value): self { $this->fields['reminder_deadline_1'] = $value; return $this; }
-    public function setReminderDeadline2(string $value): self { $this->fields['reminder_deadline_2'] = $value; return $this; }
-    public function setReminderDeadline3(string $value): self { $this->fields['reminder_deadline_3'] = $value; return $this; }
-    public function setLastDeadline(string $value): self { $this->fields['last_deadline'] = $value; return $this; }
+    public function setDeadlineCalculationDebtor(string $value) : self
+    {
+        $this->fields['deadline_calculation_debtor'] = $value;
+        return $this;
+    }
+
+    public function setReminderDeadline1(string $value) : self
+    {
+        $this->fields['reminder_deadline_1'] = $value;
+        return $this;
+    }
+
+    public function setReminderDeadline2(string $value) : self
+    {
+        $this->fields['reminder_deadline_2'] = $value;
+        return $this;
+    }
+
+    public function setReminderDeadline3(string $value) : self
+    {
+        $this->fields['reminder_deadline_3'] = $value;
+        return $this;
+    }
+
+    public function setLastDeadline(string $value) : self
+    {
+        $this->fields['last_deadline'] = $value;
+        return $this;
+    }
+
+}
