@@ -6,6 +6,7 @@
     </option>
   </component>
   <component name="LaravelIdeaMainSettings">
+    <option name="appDirectory" value="src" />
     <option name="frameworkFound" value="true" />
     <option name="laravelBasePath" value="vendor/pestphp/pest" />
   </component>
