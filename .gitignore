@@ -1,1 +1,47 @@
-vendor
+# Composer
+/vendor/
+composer.lock
+
+# IDE-specific files
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+/.atom/
+/.buildpath
+/.project
+/.settings/
+
+# PHP error logs
+php_errors.log
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Cache files
+/.phpunit.result.cache
+/.php_cs.cache
+/.php-cs-fixer.cache
+
+# Environment files
+/.env
+/.env.local
+/.env.*.local
+
+# Build directories
+/build/
+/dist/
+
+# PHPDoc-generated documentation
+/docs/api/
+
+# Test coverage files
+/coverage/
+/clover.xml
+
+# Operating system-specific files
+.DS_Store
+Thumbs.db
