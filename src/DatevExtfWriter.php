@@ -15,6 +15,17 @@ class DatevExtfWriter
     protected string $formatName;
 
     /**
+     * Statische Factory-Methode für Fluent Interface
+     * 
+     * @param string $formatName Type of data (e.g., 'Buchungsstapel', 'Debitoren/Kreditoren')
+     * @return self
+     */
+    public static function make(string $formatName = FormatName::BUCHUNGSSTAPEL): self
+    {
+        return new self($formatName);
+    }
+
+    /**
      * Constructor
      *
      * @param string $formatName Type of data (e.g., 'Buchungsstapel', 'Debitoren/Kreditoren')

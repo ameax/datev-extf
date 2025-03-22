@@ -7,6 +7,16 @@ class DatevExtfWriterParty
 
     protected array $fields = [];
 
+    /**
+     * Statische Factory-Methode für Fluent Interface
+     * 
+     * @return self
+     */
+    public static function make(): self
+    {
+        return new self();
+    }
+
     public function __construct()
     {
         $this->applyDefaults();
