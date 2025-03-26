@@ -142,14 +142,72 @@ class DatevExtfWriter
     }
 
     /**
-     * Generate the output file
+     * Get the content as string
+     *
+     * @return string
+     */
+    public function toString(): string
+    {
+        return $this->build();
+    }
+
+    /**
+     * Save the content to a file
+     *
+     * @param string $path Path to save the file
+     * @return bool Success of the file operation
+     * @throws \RuntimeException If file could not be saved
+     */
+    public function saveTo(string $path): bool
+    {
+        if (file_put_contents($path, $this->toString()) === false) {
+            throw new \RuntimeException("Failed to save file to path: {$path}");
+        }
+        return true;
+    }
+
+    /**
+     * Output the content for download
+     *
+     * @param string $filename Name of the file to download
+     * @return void
+     */
+    public function download(string $filename): void
+    {
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . strlen($this->toString()));
+        header('Cache-Control: no-cache');
+        header('Pragma: no-cache');
+        
+        echo $this->toString();
+        exit;
+    }
+
+    /**
+     * Output the content as stream
+     *
+     * @return void
+     */
+    public function stream(): void
+    {
+        header('Content-Type: text/csv');
+        header('Cache-Control: no-cache');
+        header('Pragma: no-cache');
+        
+        echo $this->toString();
+        exit;
+    }
+
+    /**
+     * Generate the output file (deprecated, use saveTo instead)
      *
      * @param string $filePath Path to the output file
      * @return bool Success of the file operation
+     * @deprecated Use saveTo() instead
      */
     public function generateFile(string $filePath): bool
     {
-        $content = $this->build();
-        return file_put_contents($filePath, $content) !== false;
+        return $this->saveTo($filePath);
     }
 }

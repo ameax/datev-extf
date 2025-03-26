@@ -29,7 +29,7 @@ use ameax\DatevExtf\Enums\DebitCreditIndicator;
 use ameax\DatevExtf\Enums\FormatName;
 
 // Writer mit Formattyp initialisieren
-$writer = new DatevExtfWriter(FormatName::BUCHUNGSSTAPEL);
+$writer = DatevExtfWriter::make(FormatName::BUCHUNGSSTAPEL);
 
 // Header konfigurieren
 $writer->getHeader()->fromArray([
@@ -58,8 +58,24 @@ $entry->fromArray([
 // Eintrag zum Writer hinzufügen
 $writer->addEntry($entry);
 
-// Datei generieren
-$writer->generateFile('buchungsstapel_export.csv');
+// Verschiedene Ausgabemöglichkeiten:
+
+// 1. Als String erhalten
+$content = $writer->toString();
+
+// 2. In Datei speichern
+try {
+    $writer->saveTo('buchungsstapel_export.csv');
+} catch (\RuntimeException $e) {
+    // Fehlerbehandlung
+    echo "Fehler beim Speichern: " . $e->getMessage();
+}
+
+// 3. Datei herunterladen
+$writer->download('buchungsstapel_export.csv');
+
+// 4. Inhalt streamen
+$writer->stream();
 ```
 
 ## Beispiel: Debitoren/Kreditoren
@@ -73,7 +89,7 @@ use ameax\DatevExtf\Enums\AddressType;
 use ameax\DatevExtf\Enums\FormatName;
 
 // Writer für Debitoren/Kreditoren initialisieren
-$writer = new DatevExtfWriter(FormatName::DEBITOREN_KREDITOREN);
+$writer = DatevExtfWriter::make(FormatName::DEBITOREN_KREDITOREN);
 
 // Header konfigurieren
 $writer->getHeader()->fromArray([
@@ -101,8 +117,24 @@ $party->fromArray([
 // Kontakt zum Writer hinzufügen
 $writer->addEntry($party);
 
-// Datei generieren
-$writer->generateFile('debitoren_kreditoren_export.csv');
+// Verschiedene Ausgabemöglichkeiten:
+
+// 1. Als String erhalten
+$content = $writer->toString();
+
+// 2. In Datei speichern
+try {
+    $writer->saveTo('debitoren_kreditoren_export.csv');
+} catch (\RuntimeException $e) {
+    // Fehlerbehandlung
+    echo "Fehler beim Speichern: " . $e->getMessage();
+}
+
+// 3. Datei herunterladen
+$writer->download('debitoren_kreditoren_export.csv');
+
+// 4. Inhalt streamen
+$writer->stream();
 ```
 
 ## Datumsfelder (DateTime)
@@ -233,7 +265,7 @@ use ameax\DatevExtf\Enums\DebitCreditIndicator;
 use ameax\DatevExtf\Enums\FormatName;
 
 // Initialize writer with format type
-$writer = new DatevExtfWriter(FormatName::BUCHUNGSSTAPEL);
+$writer = DatevExtfWriter::make(FormatName::BUCHUNGSSTAPEL);
 
 // Configure header
 $writer->getHeader()->fromArray([
@@ -262,8 +294,24 @@ $entry->fromArray([
 // Add entry to writer
 $writer->addEntry($entry);
 
-// Generate file
-$writer->generateFile('booking_batch_export.csv');
+// Different output options:
+
+// 1. Get as string
+$content = $writer->toString();
+
+// 2. Save to file
+try {
+    $writer->saveTo('booking_batch_export.csv');
+} catch (\RuntimeException $e) {
+    // Error handling
+    echo "Error saving file: " . $e->getMessage();
+}
+
+// 3. Download file
+$writer->download('booking_batch_export.csv');
+
+// 4. Stream content
+$writer->stream();
 ```
 
 ## Example: Debtors/Creditors
@@ -277,7 +325,7 @@ use ameax\DatevExtf\Enums\AddressType;
 use ameax\DatevExtf\Enums\FormatName;
 
 // Initialize writer for debtors/creditors
-$writer = new DatevExtfWriter(FormatName::DEBITOREN_KREDITOREN);
+$writer = DatevExtfWriter::make(FormatName::DEBITOREN_KREDITOREN);
 
 // Configure header
 $writer->getHeader()->fromArray([
@@ -305,8 +353,24 @@ $party->fromArray([
 // Add contact to writer
 $writer->addEntry($party);
 
-// Generate file
-$writer->generateFile('debtors_creditors_export.csv');
+// Different output options:
+
+// 1. Get as string
+$content = $writer->toString();
+
+// 2. Save to file
+try {
+    $writer->saveTo('debtors_creditors_export.csv');
+} catch (\RuntimeException $e) {
+    // Error handling
+    echo "Error saving file: " . $e->getMessage();
+}
+
+// 3. Download file
+$writer->download('debtors_creditors_export.csv');
+
+// 4. Stream content
+$writer->stream();
 ```
 
 ## Date Fields (DateTime)
